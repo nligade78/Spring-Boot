@@ -6,6 +6,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.ApplicationContext;
 
+import java.util.List;
+import java.util.Optional;
+
 @SpringBootApplication
 public class SpringDataJpaApplication {
 
@@ -13,15 +16,48 @@ public class SpringDataJpaApplication {
 	ApplicationContext context = SpringApplication.run(SpringDataJpaApplication.class, args);
 		UserRepository userRepository = context.getBean(UserRepository.class);
 
-		User user=new User();
-		user.setName("Nikhil");
-		user.setCity("Pune");
-		user.setStatus("Analyst");
+		/*
+		//create users objects
+		User user1=new User();
+		user1.setName("Nikhil");
+		user1.setCity("Pune");
+		user1.setStatus("Analyst");
 
-		User saveUser=userRepository.save(user);
-		System.out.println(saveUser);
+		User user2=new User();
+		user2.setName("Rahul");
+		user2.setCity("Mumbai");
+		user2.setStatus("Analyst");
 
-		System.out.println("Crud Operation");
+
+
+		//saving single user objects
+		//User saveUser=userRepository.save(user1);
+
+		//save multiple users objects
+		List<User> users=List.of(user1,user2);
+		System.out.println(users);
+		Iterable<User>  result= userRepository.saveAll(users);
+		result.forEach(System.out::println);
+*/
+
+		//update user by id
+//		Optional<User> optional= userRepository.findById(1);
+//		User user= optional.get();
+//		user.setName("Nikhil Ligade");
+//		userRepository.save(user);
+
+		//how to get data
+//		Optional<User> byId = userRepository.findById(1);
+//		System.out.println(byId);
+
+		//get all data
+//		Iterable<User> allData= userRepository.findAll();
+//		allData.forEach(System.out::println);
+//		System.out.println("Crud Operation");
+
+		//Delete the user
+//		userRepository.deleteById(53);
+//		System.out.println("Deleted");
 	}
 
 }
