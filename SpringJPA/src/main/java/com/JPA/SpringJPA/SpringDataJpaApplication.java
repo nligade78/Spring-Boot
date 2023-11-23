@@ -20,6 +20,8 @@ public class SpringDataJpaApplication {
 
 		User saveUser=userRepository.save(user);
 		System.out.println(saveUser);
+
+		System.out.println("Crud Operation");
 	}
 
 }
