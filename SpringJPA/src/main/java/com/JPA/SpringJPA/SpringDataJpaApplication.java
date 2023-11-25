@@ -59,15 +59,28 @@ public class SpringDataJpaApplication {
 //		userRepository.deleteById(53);
 //		System.out.println("Deleted");
 
-        List<User> result= userRepository.findByName("Nikhil");
-        result.forEach(data->{
-            System.out.println(data);
-        });
+//        List<User> result= userRepository.findByName("Nikhil");
+//        result.forEach(data->{
+//            System.out.println(data);
+//        });
+//
+//        List<User> result1= userRepository.findByCity("Pune");
+//        for (User data : result1) {
+//            System.out.println(data);
+//        }
 
-        List<User> result1= userRepository.findByCity("Pune");
-        for (User data : result1) {
-            System.out.println(data);
-        }
+        //getData using Jpql
+//        List<User> allUser= userRepository.getAllUser();
+//        allUser.forEach(e->{
+//            System.out.println(e);
+//        });
+
+        //get data using Jpql by name
+
+        List<User> getName= userRepository.getUserByName("Nikhil","Pune");
+        getName.forEach(e->{
+            System.out.println(e);
+        });
     }
 
 }
