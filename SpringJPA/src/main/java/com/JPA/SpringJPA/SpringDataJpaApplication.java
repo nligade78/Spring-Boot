@@ -77,8 +77,13 @@ public class SpringDataJpaApplication {
 
         //get data using Jpql by name
 
-        List<User> getName= userRepository.getUserByName("Nikhil","Pune");
-        getName.forEach(e->{
+//        List<User> getName= userRepository.getUserByName("Nikhil","Pune");
+//        getName.forEach(e->{
+//            System.out.println(e);
+//        });
+
+        List<User> users= userRepository.getUsers();
+        users.forEach(e->{
             System.out.println(e);
         });
     }

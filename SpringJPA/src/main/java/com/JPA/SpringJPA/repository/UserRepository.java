@@ -20,5 +20,9 @@ public interface UserRepository extends CrudRepository<User,Integer> {
     public List<User> getUserByName(@Param("n") String name,@Param("c") String city); //n Parameter bounded
 
 
+    //Native Query Methods
+    @Query(value = "select * from user",nativeQuery = true)
+    public List<User> getUsers();
+
 
 }
