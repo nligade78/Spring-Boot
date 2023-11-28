@@ -18,18 +18,21 @@ public class BookController {
         return "This is testing book";
     }
 
+    //gate all data handler
     @GetMapping("/data")
     public List<Book> getAllBook()
     {
         return this.bookServices.getBookList();
     }
 
+    //gate data by id handler
     @GetMapping("/book/{id}")
     public Book getBookById(@PathVariable("id") int id)
     {
         return this.bookServices.getBookById(id);
     }
 
+    //insert a new data handler
     @PostMapping("/books")
     public Book addBook(@RequestBody Book book)
     {
@@ -37,12 +40,20 @@ public class BookController {
         return b;
     }
 
+    //delete data by id handler
     @DeleteMapping("/book/{bookId}")
     public void deleteBook(@PathVariable("bookId") int bookId)
     {
         this.bookServices.deleteBook(bookId);
         System.out.println("Book Deleted");
 
+    }
+    //update book handler
+    @PutMapping("/book/{bookId}")
+    public Book updateBook(@RequestBody Book book,@PathVariable("bookId") int bookId)
+    {
+        this.bookServices.updateBook(book,bookId);
+       return book;
     }
 
 }
