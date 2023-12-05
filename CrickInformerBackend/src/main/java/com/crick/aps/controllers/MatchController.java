@@ -27,7 +27,7 @@ public class MatchController {
 
     // get Live matches
 
-    @GetMapping("/live")
+    @GetMapping("/match")
     public  ResponseEntity<?> getLiveMatches()  throws InterruptedException
     {
         System.out.println("getting live match");
