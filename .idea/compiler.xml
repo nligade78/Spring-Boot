@@ -8,6 +8,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="RestBookAPI" />
         <module name="SpringJPA" />
+        <module name="FileUploading" />
         <module name="CrickInformerBackend" />
         <module name="springmvcboot" />
       </profile>
@@ -19,6 +20,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="CrickInformerBackend" options="-parameters" />
+      <module name="FileUploading" options="-parameters" />
       <module name="RestBookAPI" options="-parameters" />
       <module name="SpringBook" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
