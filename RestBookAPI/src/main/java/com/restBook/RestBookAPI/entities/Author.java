@@ -1,5 +1,6 @@
 package com.restBook.RestBookAPI.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 @Entity
@@ -11,14 +12,27 @@ public class Author {
     private String firstName;
     private String lastName;
     private String language;
+    @OneToOne(mappedBy = "author")
+    @JsonBackReference
+    private Book book;
 
-    public int getId() {
+
+    public int getAuthorId() {
         return authorId;
     }
 
-    public void setId(int id) {
-        this.authorId = id;
+    public void setAuthorId(int authorId) {
+        this.authorId = authorId;
     }
+
+    public Book getBook() {
+        return book;
+    }
+
+    public void setBook(Book book) {
+        this.book = book;
+    }
+
 
     public String getFirstName() {
         return firstName;
@@ -44,11 +58,12 @@ public class Author {
         this.language = language;
     }
 
-    public Author(int id, String firstName, String lastName, String language) {
+    public Author(int id, String firstName, String lastName, String language,Book book) {
         this.authorId = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.language = language;
+        this.book=book;
     }
 
     public Author() {
