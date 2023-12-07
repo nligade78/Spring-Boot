@@ -8,6 +8,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="RestBookAPI" />
+        <module name="Thymeleaf-Project" />
         <module name="SpringJPA" />
         <module name="FileUploading" />
         <module name="CrickInformerBackend" />
@@ -25,6 +26,7 @@
       <module name="RestBookAPI" options="-parameters" />
       <module name="SpringBook" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
+      <module name="Thymeleaf-Project" options="-parameters" />
       <module name="springmvcboot" options="-parameters" />
     </option>
   </component>
