@@ -31,7 +31,21 @@ public class MyController {
 //        ArrayList<String> data = new ArrayList<String>();
         List<String> names= List.of("Nikhil", "Rahul", "Laxmi", "Vikas");
         m.addAttribute("names", names);
+
         return"iterate";
+    }
+
+    @GetMapping("/condition")
+    public String conditionHandler(Model m)
+    {
+        System.out.println("Condition Handler Executed");
+
+        m.addAttribute("isActive",true);
+        m.addAttribute("gender","M");
+
+        List<Integer> list=List.of(233,452,799,245,567,7878);
+        m.addAttribute("myList",list);
+        return "condition";
     }
 
 }
