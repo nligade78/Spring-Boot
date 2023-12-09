@@ -3,10 +3,13 @@ package com.thymeleaf.Thymeleaf.Project.controller;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Controller
 public class MyController {
@@ -20,4 +23,15 @@ public class MyController {
         model.addAttribute("currentDate",new Date());
         return "about"; //about.html
     }
+
+    //handling iterations
+    @GetMapping("/example-loop")
+    public String iterateHandler(Model m)
+    {
+//        ArrayList<String> data = new ArrayList<String>();
+        List<String> names= List.of("Nikhil", "Rahul", "Laxmi", "Vikas");
+        m.addAttribute("names", names);
+        return"iterate";
+    }
+
 }
