@@ -11,6 +11,7 @@
         <option value="$PROJECT_DIR$/RestBookAPI/pom.xml" />
         <option value="$PROJECT_DIR$/FileUploading/pom.xml" />
         <option value="$PROJECT_DIR$/Thymeleaf-Project/pom.xml" />
+        <option value="$PROJECT_DIR$/spring-validation/pom.xml" />
       </list>
     </option>
   </component>

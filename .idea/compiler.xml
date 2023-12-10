@@ -7,16 +7,18 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="RestBookAPI" />
         <module name="Thymeleaf-Project" />
-        <module name="SpringJPA" />
+        <module name="spring-validation" />
         <module name="FileUploading" />
         <module name="CrickInformerBackend" />
+        <module name="RestBookAPI" />
+        <module name="SpringJPA" />
         <module name="springmvcboot" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="SpringBook" target="20" />
+      <module name="springvalidation" target="20" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
@@ -27,7 +29,9 @@
       <module name="SpringBook" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
       <module name="Thymeleaf-Project" options="-parameters" />
+      <module name="spring-validation" options="-parameters" />
       <module name="springmvcboot" options="-parameters" />
+      <module name="springvalidation" options="-parameters" />
     </option>
   </component>
 </project>
