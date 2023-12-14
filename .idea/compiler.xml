@@ -12,6 +12,7 @@
         <module name="FileUploading" />
         <module name="CrickInformerBackend" />
         <module name="RestBookAPI" />
+        <module name="SmartContactManager" />
         <module name="SpringJPA" />
         <module name="springmvcboot" />
       </profile>
@@ -26,6 +27,7 @@
       <module name="CrickInformerBackend" options="-parameters" />
       <module name="FileUploading" options="-parameters" />
       <module name="RestBookAPI" options="-parameters" />
+      <module name="SmartContactManager" options="-parameters" />
       <module name="SpringBook" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
       <module name="Thymeleaf-Project" options="-parameters" />
