@@ -1,6 +1,8 @@
 package com.smart.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.ArrayList;
@@ -13,6 +15,9 @@ public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
+
+    @NotBlank(message = "Name Should not be empty !!")
+    @Size(min=2,max=20,message = "Minimum 2 or 20 characters required")
     private String name;
     @Column(unique = true)
     private String email;
