@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      th:replace="base::layout(~{::section})">
+<head>
+  <meta charset="UTF-8" />
+  <title>this is home page</title>
+</head>
+
+<body>
+        <section>
+          <div class="container">
+            <div class="card card-container">
+              <img id="profile-img" class="profile-img-card" th:src="@{/img/login.png}" />
+              <p id="profile-name" class="profile-name-card"></p>
+
+              <form class="form-signin" th:action="@{/dologin}" action="#" method="post">
+
+                <div th:if="${param.error}" class="alert alert-danger">
+                    Invalid username and password
+                </div>
+
+                <div th:if="${param.logout}" class="alert alert-success">
+                  You have been logged out
+                </div>
+
+                  <span id="reauth-email" class="reauth-email"></span>
+
+
+                <input type="email" name="username" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+
+                <input type="password" name="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
+                <div id="remember" class="checkbox">
+                  <label>
+                    <input type="checkbox" value="remember-me"> Remember me
+                  </label>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block btn-signin" type="submit">Sign in</button>
+              </form><!-- /form -->
+              <a href="/signup/" class="register-here">
+                Register Here
+              </a>
+              <a href="#" class="forgot-password">
+                Forgot the password?
+              </a>
+            </div><!-- /card-container -->
+          </div><!-- /container -->
+        </section>
+</body>
+</html>
