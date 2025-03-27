@@ -7,6 +7,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="eduMaintenanceSystem" />
         <module name="Thymeleaf-Project" />
         <module name="spring-validation" />
         <module name="FileUploading" />
@@ -18,6 +19,7 @@
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="demo" target="20" />
       <module name="SpringBook" target="20" />
       <module name="springvalidation" target="20" />
     </bytecodeTargetLevel>
@@ -31,6 +33,8 @@
       <module name="SpringBook" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
       <module name="Thymeleaf-Project" options="-parameters" />
+      <module name="demo" options="-parameters" />
+      <module name="eduMaintenanceSystem" options="-parameters" />
       <module name="spring-validation" options="-parameters" />
       <module name="springmvcboot" options="-parameters" />
       <module name="springvalidation" options="-parameters" />

@@ -13,10 +13,11 @@
         <option value="$PROJECT_DIR$/Thymeleaf-Project/pom.xml" />
         <option value="$PROJECT_DIR$/spring-validation/pom.xml" />
         <option value="$PROJECT_DIR$/SmartContactManager/pom.xml" />
+        <option value="$PROJECT_DIR$/eduMaintenanceSystem/pom.xml" />
       </list>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_20" project-jdk-name="11" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_20" project-jdk-name="17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
