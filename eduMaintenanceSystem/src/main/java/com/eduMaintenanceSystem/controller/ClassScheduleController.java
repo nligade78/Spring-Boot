@@ -24,7 +24,7 @@ public class ClassScheduleController {
 
     /**
      * Schedules a class with a given course, mentor, multiple student IDs and time slot.
-     * Example: POST /api/class-schedules/schedule?courseId=1&mentorId=1&studentIds=1,2,3&timeSlot=07:00
+     * Example: POST /api/class-schedules/schedule?courseId=1&mentorId=1&studentIds=1,2,3&timeSlot=07:00   dfddxfgv
      */
     @PostMapping("/schedule")
     public ResponseEntity<ClassSchedule> scheduleClass(
