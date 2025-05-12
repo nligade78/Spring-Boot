@@ -17,6 +17,15 @@
         <module name="SpringJPA" />
         <module name="springmvcboot" />
       </profile>
+      <profile name="Annotation profile for EmployeeManagement" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="EmployeeManagement" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="demo" target="20" />
@@ -27,6 +36,7 @@
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
       <module name="CrickInformerBackend" options="-parameters" />
+      <module name="EmployeeManagement" options="-parameters" />
       <module name="FileUploading" options="-parameters" />
       <module name="RestBookAPI" options="-parameters" />
       <module name="SmartContactManager" options="-parameters" />
