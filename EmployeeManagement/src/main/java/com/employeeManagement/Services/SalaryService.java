@@ -1,110 +1,83 @@
 package com.employeeManagement.Services;
 
 import com.employeeManagement.Dto.SalaryRequest;
-import com.employeeManagement.entity.Employee;
+import com.employeeManagement.Dto.SalaryResponse;
 import com.employeeManagement.entity.Salary;
 import com.employeeManagement.repository.EmployeeRepository;
 import com.employeeManagement.repository.SalaryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class SalaryService {
 
-    @Autowired
-    private SalaryRepository salaryRepository;
+    private final SalaryRepository salaryRepository;
+    private final EmployeeRepository employeeRepository;
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
-
-
-//    public Salary addOrUpdateSalary(SalaryRequest request) {
-//        Employee employee = employeeRepository.findById(request.getEmployeeId())
-//                .orElseThrow(() -> new RuntimeException("Employee not found"));
-//
-//        // Find salary by employeeId, month, and year
-//        Optional<Salary> existingSalary = salaryRepository
-//                .findByEmployeeIdAndSalaryMonthAndSalaryYear(
-//                        request.getEmployeeId(), request.getSalaryMonth(), request.getSalaryYear());
-//
-//        Salary salary = existingSalary.orElse(new Salary());
-//
-//        salary.setBasicPay(request.getBasicPay());
-//        salary.setHra(request.getHra());
-//        salary.setBonus(request.getBonus());
-//        salary.setSalaryMonth(request.getSalaryMonth());
-//        salary.setSalaryYear(request.getSalaryYear());
-//        salary.setEmployee(employee);
-//
-//        return salaryRepository.save(salary);
-//    }
-
-//    public Salary addSalary(SalaryRequest request) {
-//        Employee employee = employeeRepository.findById(request.getEmployeeId())
-//                .orElseThrow(() -> new RuntimeException("Employee not found"));
-//
-//        // Check if salary already exists for this employee, month, and year
-//        Optional<Salary> existingSalary = salaryRepository
-//                .findByEmployeeIdAndSalaryMonthAndSalaryYear(
-//                        request.getEmployeeId(), request.getSalaryMonth(), request.getSalaryYear());
-//
-//        if (existingSalary.isPresent()) {
-//            throw new RuntimeException("Salary already exists for this employee in the specified month and year");
-//        }
-//
-//        // Add new salary
-//        Salary salary = new Salary();
-//        salary.setBasicPay(request.getBasicPay());
-//        salary.setHra(request.getHra());
-//        salary.setBonus(request.getBonus());
-//        salary.setSalaryMonth(request.getSalaryMonth());
-//        salary.setSalaryYear(request.getSalaryYear());
-//        salary.setEmployee(employee);
-//
-//        return salaryRepository.save(salary);
-//    }
-
-    public Salary addSalary(SalaryRequest request) {
-        // Find the employee by ID
-        Employee employee = employeeRepository.findById(request.getEmployeeId())
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        // Check if a salary already exists for this employee, month, and year
-        Optional<Salary> existingSalary = salaryRepository
-                .findByEmployeeIdAndSalaryMonthAndSalaryYear(
-                        request.getEmployeeId(), request.getSalaryMonth(), request.getSalaryYear());
-
-        if (existingSalary.isPresent()) {
-            // If a salary already exists, update it
-            Salary salary = existingSalary.get();
-            salary.setBasicPay(request.getBasicPay());
-            salary.setHra(request.getHra());
-            salary.setBonus(request.getBonus());
-            return salaryRepository.save(salary);  // Save the updated salary
-        }
-
-        // If no salary exists for this employee, month, and year, create a new salary
-        Salary salary = new Salary();
-        salary.setBasicPay(request.getBasicPay());
-        salary.setHra(request.getHra());
-        salary.setBonus(request.getBonus());
-        salary.setSalaryMonth(request.getSalaryMonth());
-        salary.setSalaryYear(request.getSalaryYear());
-        salary.setEmployee(employee);
-
-        return salaryRepository.save(salary);  // Save the new salary
-    }
-    public List<Salary> getSalariesByManager(Long managerId) {
-        return salaryRepository.findAllByEmployee_Manager_Id(managerId);
+    public SalaryService(SalaryRepository salaryRepository, EmployeeRepository employeeRepository) {
+        this.salaryRepository = salaryRepository;
+        this.employeeRepository = employeeRepository;
     }
 
-    public List<Salary> getSalaryByEmployee(Long employeeId) {
+    /**
+     * Add or update salary reactively for an employee for a specific month and year.
+     */
+    public Mono<SalaryResponse> addSalary(SalaryRequest request) {
+        return employeeRepository.findById(request.getEmployeeId())
+                .switchIfEmpty(Mono.error(new RuntimeException("Employee not found")))
+                .flatMap(employee ->
+                        salaryRepository.findByEmployeeIdAndSalaryMonthAndSalaryYear(
+                                        request.getEmployeeId(), request.getSalaryMonth(), request.getSalaryYear())
+                                .flatMap(existingSalary -> {
+                                    existingSalary.setBasicPay(request.getBasicPay());
+                                    existingSalary.setHra(request.getHra());
+                                    existingSalary.setBonus(request.getBonus());
+                                    return salaryRepository.save(existingSalary);
+                                })
+                                .switchIfEmpty(Mono.defer(() -> {
+                                    Salary salary = new Salary();
+                                    salary.setBasicPay(request.getBasicPay());
+                                    salary.setHra(request.getHra());
+                                    salary.setBonus(request.getBonus());
+                                    salary.setSalaryMonth(request.getSalaryMonth());
+                                    salary.setSalaryYear(request.getSalaryYear());
+                                    salary.setEmployeeId(employee.getId());
+                                    return salaryRepository.save(salary);
+                                }))
+                )
+                .map(saved -> new SalaryResponse(
+                        saved.getEmployeeId(),
+                        saved.getSalaryMonth(),
+                        saved.getSalaryYear(),
+                        saved.getBasicPay(),
+                        saved.getHra(),
+                        saved.getBonus()
+                ));
+    }
+
+    /**
+     * Fetch all salaries for employees managed by a specific manager reactively.
+     * Optimized to fetch all employee IDs and then salaries in bulk.
+     */
+    public Flux<Salary> getSalariesByManager(Long managerId) {
+        return employeeRepository.findAllByManagerId(managerId)
+                .map(employee -> employee.getId())
+                .collectList()
+                .flatMapMany(employeeIds -> {
+                    if (employeeIds.isEmpty()) {
+                        return Flux.empty();
+                    }
+                    return salaryRepository.findAllByEmployeeIdIn(employeeIds);
+                });
+    }
+
+    /**
+     * Fetch all salary records for a specific employee reactively.
+     */
+    public Flux<Salary> getSalaryByEmployee(Long employeeId) {
         return salaryRepository.findAllByEmployeeId(employeeId);
     }
-
-
 }
-

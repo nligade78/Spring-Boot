@@ -1,37 +1,60 @@
 package com.employeeManagement.Services;
 
+import com.employeeManagement.Exception.DepartmentNotFoundException;
 import com.employeeManagement.entity.Department;
 import com.employeeManagement.repository.DepartmentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class DepartmentService {
 
-    @Autowired
-    private DepartmentRepository departmentRepository;
+    private static final Logger logger = LoggerFactory.getLogger(DepartmentService.class);
 
-    public Department addDepartment(Department department) {
-        return departmentRepository.save(department);
+    private final DepartmentRepository departmentRepository;
+
+    public DepartmentService(DepartmentRepository departmentRepository) {
+        this.departmentRepository = departmentRepository;
     }
 
-    public List<Department> getAllDepartments() {
+    // Save department reactively with validation
+    public Mono<Department> addDepartment(Department department) {
+        if (department.getDept() == null || department.getDept().trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("Department name cannot be empty"));
+        }
+        return departmentRepository.save(department)
+                .doOnSuccess(d -> logger.info("Department added: {}", d.getDept()));
+    }
+
+    // Get all departments reactively
+    public Flux<Department> getAllDepartments() {
         return departmentRepository.findAll();
     }
 
-    public Department updateDepartment(Long id, Department updatedDept) {
-        Department dept = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found"));
+    // Update department reactively with validation and custom exception
+    public Mono<Department> updateDepartment(Long id, Department updatedDept) {
+        if (updatedDept.getDept() == null || updatedDept.getDept().trim().isEmpty()) {
+            return Mono.error(new IllegalArgumentException("Department name cannot be empty"));
+        }
 
-        dept.setDept(updatedDept.getDept());
-        dept.setDescription(updatedDept.getDescription());
-
-        return departmentRepository.save(dept);
+        return departmentRepository.findById(id)
+                .switchIfEmpty(Mono.error(new DepartmentNotFoundException("Department not found with id: " + id)))
+                .flatMap(dept -> {
+                    dept.setDept(updatedDept.getDept());
+                    dept.setDescription(updatedDept.getDescription());
+                    return departmentRepository.save(dept);
+                })
+                .doOnSuccess(d -> logger.info("Department updated: {}", d.getDept()));
     }
 
-    public void deleteDepartment(Long id) {
-        departmentRepository.deleteById(id);
+    // Delete department reactively
+    public Mono<Void> deleteDepartment(Long id) {
+        logger.info("Deleting department with id: {}", id);
+        return departmentRepository.deleteById(id);
     }
 }

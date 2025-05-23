@@ -1,20 +1,20 @@
 package com.employeeManagement.entity;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Table;
 
-@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Table("manager")
 public class Manager {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private String firstName;
@@ -28,8 +28,5 @@ public class Manager {
     private String street;
     private String pincode;
 
-    @ManyToOne
-    @JoinColumn(name = "department_id")
-    private Department department;
-
+    private Long departmentId;
 }

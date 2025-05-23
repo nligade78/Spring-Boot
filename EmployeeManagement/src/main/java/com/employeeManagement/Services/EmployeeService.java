@@ -3,112 +3,119 @@ package com.employeeManagement.Services;
 import com.employeeManagement.Dto.EmployeeRequest;
 import com.employeeManagement.Dto.EmployeeResponse;
 import com.employeeManagement.Dto.LoginResponse;
+import com.employeeManagement.entity.Department;
 import com.employeeManagement.entity.Employee;
 import com.employeeManagement.entity.Manager;
+import com.employeeManagement.repository.DepartmentRepository;
 import com.employeeManagement.repository.EmployeeRepository;
 import com.employeeManagement.repository.ManagerRepository;
 import com.employeeManagement.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Service
 public class EmployeeService {
 
-    @Autowired
-    private EmployeeRepository employeeRepository;
+    private final EmployeeRepository employeeRepository;
+    private final ManagerRepository managerRepository;
+    private final DepartmentRepository departmentRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private ManagerRepository managerRepository;
-
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
-
-    @Autowired
-    private JwtUtil jwtUtil;
-
-    public EmployeeResponse addEmployee(EmployeeRequest request) {
-        Manager manager = managerRepository.findById(request.getManagerId())
-                .orElseThrow(() -> new RuntimeException("Manager not found"));
-
-        Employee emp = new Employee();
-        emp.setFirstName(request.getFirstName());
-        emp.setLastName(request.getLastName());
-        emp.setEmailId(request.getEmailId());
-//        emp.setPassword(request.getPassword());
-        emp.setGender(request.getGender());
-        emp.setPassword(passwordEncoder.encode(request.getPassword())); // ✅ ENCODE IT
-
-        emp.setAge(request.getAge());
-        emp.setContactNo(request.getContactNo());
-        emp.setExperience(request.getExperience());
-        emp.setStreet(request.getStreet());
-        emp.setPincode(request.getPincode());
-        emp.setManager(manager);
-        emp.setDepartment(manager.getDepartment()); // ✅ Auto-assign department from manager
-
-        Employee savedEmp = employeeRepository.save(emp);
-        return convertToResponse(savedEmp);
+    public EmployeeService(EmployeeRepository employeeRepository,
+                           ManagerRepository managerRepository,
+                           DepartmentRepository departmentRepository,
+                           BCryptPasswordEncoder passwordEncoder,
+                           JwtUtil jwtUtil) {
+        this.employeeRepository = employeeRepository;
+        this.managerRepository = managerRepository;
+        this.departmentRepository = departmentRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
-    public EmployeeResponse updateEmployee(Long id, EmployeeRequest request) {
-        Employee emp = employeeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
-
-        Manager manager = managerRepository.findById(request.getManagerId())
-                .orElseThrow(() -> new RuntimeException("Manager not found"));
-
-        emp.setFirstName(request.getFirstName());
-        emp.setLastName(request.getLastName());
-        emp.setEmailId(request.getEmailId());
-        emp.setPassword(request.getPassword());
-        emp.setGender(request.getGender());
-        emp.setAge(request.getAge());
-        emp.setContactNo(request.getContactNo());
-        emp.setExperience(request.getExperience());
-        emp.setStreet(request.getStreet());
-        emp.setPincode(request.getPincode());
-        emp.setManager(manager);
-        emp.setDepartment(manager.getDepartment()); // ✅ Auto-assign department from manager
-
-        return convertToResponse(employeeRepository.save(emp));
+    public Mono<EmployeeResponse> addEmployee(EmployeeRequest request) {
+        return managerRepository.findById(request.getManagerId())
+                .switchIfEmpty(Mono.error(new RuntimeException("Manager not found")))
+                .flatMap(manager -> {
+                    Employee emp = new Employee();
+                    emp.setFirstName(request.getFirstName());
+                    emp.setLastName(request.getLastName());
+                    emp.setEmailId(request.getEmailId());
+                    emp.setPassword(passwordEncoder.encode(request.getPassword())); // always encode on creation
+                    emp.setGender(request.getGender());
+                    emp.setAge(request.getAge());
+                    emp.setContactNo(request.getContactNo());
+                    emp.setExperience(request.getExperience());
+                    emp.setStreet(request.getStreet());
+                    emp.setPincode(request.getPincode());
+                    emp.setManagerId(manager.getId());
+                    emp.setDepartmentId(manager.getDepartmentId());
+                    return employeeRepository.save(emp);
+                })
+                .map(this::convertToResponse);
     }
 
-    public String deleteEmployee(Long id) {
-        employeeRepository.deleteById(id);
-        return "Employee deleted successfully";
+    public Mono<EmployeeResponse> updateEmployee(Long id, EmployeeRequest request) {
+        Mono<Employee> empMono = employeeRepository.findById(id)
+                .switchIfEmpty(Mono.error(new RuntimeException("Employee not found")));
+
+        Mono<Manager> managerMono = managerRepository.findById(request.getManagerId())
+                .switchIfEmpty(Mono.error(new RuntimeException("Manager not found")));
+
+        return Mono.zip(empMono, managerMono)
+                .flatMap(tuple -> {
+                    Employee emp = tuple.getT1();
+                    Manager manager = tuple.getT2();
+
+                    emp.setFirstName(request.getFirstName());
+                    emp.setLastName(request.getLastName());
+                    emp.setEmailId(request.getEmailId());
+
+                    // Always encode password if provided (assuming client sends raw password)
+                    if (request.getPassword() != null && !request.getPassword().isEmpty()) {
+                        emp.setPassword(passwordEncoder.encode(request.getPassword()));
+                    }
+
+                    emp.setGender(request.getGender());
+                    emp.setAge(request.getAge());
+                    emp.setContactNo(request.getContactNo());
+                    emp.setExperience(request.getExperience());
+                    emp.setStreet(request.getStreet());
+                    emp.setPincode(request.getPincode());
+
+                    emp.setManagerId(manager.getId());
+                    emp.setDepartmentId(manager.getDepartmentId());
+
+                    return employeeRepository.save(emp);
+                })
+                .map(this::convertToResponse);
     }
 
-    public List<EmployeeResponse> getAllEmployees() {
-        List<Employee> employees = employeeRepository.findAll();
-        return employees.stream()
-                .map(this::convertToResponse)
-                .toList();
+    public Mono<Void> deleteEmployee(Long id) {
+        return employeeRepository.deleteById(id);
     }
 
-
-
-    public LoginResponse loginEmployee(String emailId, String password) {
-        Optional<Employee> employeeOpt = employeeRepository.findByEmailId(emailId);
-
-        if (employeeOpt.isEmpty()) {
-            return new LoginResponse(null, "Employee with this email not found", null);
-        }
-
-        Employee employee = employeeOpt.get();
-
-        if (!passwordEncoder.matches(password, employee.getPassword())) {
-            return new LoginResponse(null, "Invalid email or password", null);
-        }
-
-        String token = jwtUtil.generateToken(emailId, "EMPLOYEE");
-
-        return new LoginResponse(token, "Login Successful", employee.getId());
+    public Flux<EmployeeResponse> getAllEmployees() {
+        return employeeRepository.findAll()
+                .flatMap(this::enrichEmployeeResponse);
     }
 
+    public Mono<LoginResponse> loginEmployee(String emailId, String password) {
+        return employeeRepository.findByEmailId(emailId)
+                .flatMap(employee -> {
+                    if (!passwordEncoder.matches(password, employee.getPassword())) {
+                        return Mono.just(new LoginResponse(null, "Invalid email or password", null));
+                    }
+                    String token = jwtUtil.generateToken(emailId, "EMPLOYEE");
+                    return Mono.just(new LoginResponse(token, "Login Successful", employee.getId()));
+                })
+                .switchIfEmpty(Mono.just(new LoginResponse(null, "Employee with this email not found", null)));
+    }
 
     private EmployeeResponse convertToResponse(Employee emp) {
         EmployeeResponse response = new EmployeeResponse();
@@ -123,22 +130,37 @@ public class EmployeeService {
         response.setStreet(emp.getStreet());
         response.setPincode(emp.getPincode());
 
-        if (emp.getManager() != null) {
-            response.setManagerName(emp.getManager().getFirstName() + " " + emp.getManager().getLastName());
-        }
-
-        if (emp.getDepartment() != null) {
-            response.setDepartmentName(emp.getDepartment().getDept());
-        }
+        // ManagerName and DepartmentName will be set in enrichEmployeeResponse
 
         return response;
     }
 
-    public Employee getEmployeeByEmail(String email) {
-        return employeeRepository.findByEmailId(email)
-                .orElseThrow(() -> new RuntimeException("Employee not found"));
+    // Fetch manager and department names and add to EmployeeResponse reactively
+    private Mono<EmployeeResponse> enrichEmployeeResponse(Employee emp) {
+        EmployeeResponse response = convertToResponse(emp);
+
+        Mono<Manager> managerMono = managerRepository.findById(emp.getManagerId());
+
+        return managerMono.flatMap(manager -> {
+            if (manager != null) {
+                response.setManagerName(manager.getFirstName() + " " + manager.getLastName());
+                // Now fetch department name by departmentId
+                return departmentRepository.findById(manager.getDepartmentId())
+                        .map(dept -> {
+                            if (dept != null) {
+                                response.setDepartmentName(dept.getDept());
+                            }
+                            return response;
+                        })
+                        .defaultIfEmpty(response);
+            } else {
+                return Mono.just(response);
+            }
+        }).switchIfEmpty(Mono.just(response));
     }
 
-
-
+    public Mono<Employee> getEmployeeByEmail(String email) {
+        return employeeRepository.findByEmailId(email)
+                .switchIfEmpty(Mono.error(new RuntimeException("Employee not found")));
+    }
 }

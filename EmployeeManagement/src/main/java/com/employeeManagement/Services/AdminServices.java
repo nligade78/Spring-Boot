@@ -4,48 +4,55 @@ import com.employeeManagement.Dto.LoginResponse;
 import com.employeeManagement.entity.Admin;
 import com.employeeManagement.repository.AdminRepository;
 import com.employeeManagement.security.JwtUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Service
 public class AdminServices {
 
-    @Autowired
-    private AdminRepository adminRepository;
+    private static final Logger logger = LoggerFactory.getLogger(AdminServices.class);
 
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
+    private final AdminRepository adminRepository;
+    private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
-    @Autowired
-    private JwtUtil jwtUtil;
+    public AdminServices(AdminRepository adminRepository,
+                        BCryptPasswordEncoder passwordEncoder,
+                        JwtUtil jwtUtil) {
+        this.adminRepository = adminRepository;
+        this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
+    }
 
-    public Admin createAdmin(Admin admin) {
+    // Reactive createAdmin
+    public Mono<Admin> createAdmin(Admin admin) {
         admin.setPassword(passwordEncoder.encode(admin.getPassword()));
-        return adminRepository.save(admin);
+        return adminRepository.save(admin)
+                .doOnSuccess(a -> logger.info("Created admin with email: {}", a.getEmail()));
     }
 
-
-    public LoginResponse login(String email, String password) {
-        Optional<Admin> adminOpt = adminRepository.findByEmail(email);
-
-        if (adminOpt.isEmpty()) {
-            return new LoginResponse(null, "Admin with this email not found");
-        }
-
-        Admin admin = adminOpt.get();
-
-        // Check password using BCrypt
-        if (!passwordEncoder.matches(password, admin.getPassword())) {
-            return new LoginResponse(null, "Invalid email or password");
-        }
-
-        // Generate JWT token
-        String token = jwtUtil.generateToken(email, "ADMIN");
-
-        return new LoginResponse(token, "Login Successful");
+    // Reactive login method returning Mono<LoginResponse>
+    public Mono<LoginResponse> login(String email, String password) {
+        return Mono.defer(() -> adminRepository.findByEmail(email)
+                .flatMap(admin -> {
+                    if (passwordEncoder.matches(password, admin.getPassword())) {
+                        String token = jwtUtil.generateToken(email, "ADMIN");
+                        logger.info("Admin login successful for email: {}", email);
+                        return Mono.just(new LoginResponse(token, "Login Successful"));
+                    } else {
+                        logger.warn("Invalid password attempt for email: {}", email);
+                        return Mono.just(new LoginResponse(null, "Invalid email or password"));
+                    }
+                })
+                .switchIfEmpty(Mono.defer(() -> {
+                    logger.warn("Admin with email {} not found", email);
+                    return Mono.just(new LoginResponse(null, "Admin with this email not found"));
+                }))
+        );
     }
-
 }

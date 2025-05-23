@@ -1,15 +1,11 @@
 package com.employeeManagement.repository;
 
 import com.employeeManagement.entity.Manager;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface ManagerRepository extends JpaRepository<Manager, Long> {
-    Optional<Manager> findByEmailIdAndPassword(String emailId, String password);
-    Optional<Manager> findByEmailId(String emailId);
-
+public interface ManagerRepository extends ReactiveCrudRepository<Manager, Long> {
+    Mono<Manager> findByEmailId(String emailId);
 }
-

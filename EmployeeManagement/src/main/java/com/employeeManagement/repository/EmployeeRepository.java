@@ -1,15 +1,15 @@
 package com.employeeManagement.repository;
 
 import com.employeeManagement.entity.Employee;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface EmployeeRepository extends JpaRepository<Employee, Long> {
-    Optional<Employee> findByEmailId(String emailId); // MUST return Employee
+public interface EmployeeRepository extends ReactiveCrudRepository<Employee, Long> {
+
+    Mono<Employee> findByEmailId(String emailId);
+    Flux<Employee> findAllByManagerId(Long managerId);
 
 }
-
-
