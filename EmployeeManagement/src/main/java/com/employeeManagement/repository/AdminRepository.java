@@ -1,15 +1,11 @@
 package com.employeeManagement.repository;
 
 import com.employeeManagement.entity.Admin;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface AdminRepository extends JpaRepository<Admin,Integer> {
-
-   Optional<Admin> findByEmailAndPassword(String email, String password);
-   Optional<Admin> findByEmail(String email); // ✅ use this now instead
-
+public interface AdminRepository extends ReactiveCrudRepository<Admin, Long> {
+   Mono<Admin> findByEmail(String email);
 }

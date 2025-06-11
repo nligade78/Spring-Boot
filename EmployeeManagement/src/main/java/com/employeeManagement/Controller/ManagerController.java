@@ -9,8 +9,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -22,41 +24,54 @@ public class ManagerController {
     private ManagerService managerService;
 
     @PostMapping("/add")
-    public ResponseEntity<Manager> addManager(@RequestBody ManagerRequest request) {
-        return new ResponseEntity<>(managerService.createManager(request), HttpStatus.CREATED);
+    public Mono<ResponseEntity<Manager>> addManager(@RequestBody ManagerRequest request) {
+        return managerService.createManager(request)
+                .map(manager -> ResponseEntity.status(HttpStatus.CREATED).body(manager))
+                .defaultIfEmpty(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build())
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)));
     }
 
-    // Corrected: Removed the broken commented login method
-
     @PostMapping("/login")
-    @PreAuthorize("permitAll()") // Allow public access to login
-    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+    @PreAuthorize("permitAll()")
+    public Mono<ResponseEntity<Map<String, Object>>> login(@RequestBody Map<String, String> request) {
         String email = request.get("emailId");
         String password = request.get("password");
 
-        LoginResponse loginResponse = managerService.login(email, password);
-
-        // Also get the manager entity to retrieve the ID
-        Manager manager = managerService.getManagerByEmail(email);
-
-        return ResponseEntity.ok(Map.of(
-                "token", loginResponse.getToken(),
-                "id", manager.getId()
-        ));
+        return managerService.login(email, password)
+                .flatMap(loginResponse -> managerService.getManagerByEmail(email)
+                        .map(manager -> {
+                            Map<String, Object> success = new HashMap<>();
+                            success.put("token", loginResponse.getToken());
+                            success.put("id", manager.getId());
+                            return ResponseEntity.ok(success);
+                        })
+                        .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                                .body(Map.of("error", "Manager not found"))))
+                )
+                .switchIfEmpty(Mono.just(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("error", "Invalid email or password"))))
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(Map.of("error", "Internal server error"))));
     }
 
     @GetMapping("/view")
-    public ResponseEntity<List<Manager>> viewAllManagers() {
-        return ResponseEntity.ok(managerService.getAllManagers());
+    public Flux<Manager> viewAllManagers() {
+        return managerService.getAllManagers();
     }
 
     @PutMapping("/update/{id}")
-    public ResponseEntity<Manager> updateManager(@PathVariable Long id, @RequestBody ManagerRequest request) {
-        return ResponseEntity.ok(managerService.updateManager(id, request));
+    public Mono<ResponseEntity<Manager>> updateManager(@PathVariable Long id, @RequestBody ManagerRequest request) {
+        return managerService.updateManager(id, request)
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null)));
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<String> deleteManager(@PathVariable Long id) {
-        return ResponseEntity.ok(managerService.deleteManager(id));
+    public Mono<ResponseEntity<String>> deleteManager(@PathVariable Long id) {
+        return managerService.deleteManager(id)
+                .thenReturn(ResponseEntity.ok("Manager deleted successfully"))
+                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Delete failed: " + e.getMessage())));
     }
 }

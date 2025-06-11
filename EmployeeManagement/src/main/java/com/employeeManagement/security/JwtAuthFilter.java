@@ -1,52 +1,74 @@
 package com.employeeManagement.security;
 
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter implements WebFilter {
+
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthFilter.class);
 
     @Autowired
     private JwtUtil jwtUtil;
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
-
-        String authHeader = request.getHeader("Authorization");
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
 
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String jwt = authHeader.substring(7);
-            String email = jwtUtil.extractUsername(jwt);
-            Claims claims = jwtUtil.extractAllClaims(jwt); // ✅ Extract full claims
+            String token = authHeader.substring(7);
 
-            if (email != null && jwtUtil.validateToken(jwt, email)) {
-                var authorities = ((List<?>) claims.get("authorities")).stream()
-                        .map(role -> new SimpleGrantedAuthority(role.toString()))
-                        .toList();
+            try {
+                String email = jwtUtil.extractUsername(token);
+                Claims claims = jwtUtil.extractAllClaims(token);
 
-                UsernamePasswordAuthenticationToken authToken =
-                        new UsernamePasswordAuthenticationToken(email, null, authorities);
+                if (email != null && jwtUtil.validateToken(token, email)) {
+                    List<SimpleGrantedAuthority> authorities = extractAuthoritiesFromClaims(claims);
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    UsernamePasswordAuthenticationToken auth =
+                            new UsernamePasswordAuthenticationToken(email, null, authorities);
+
+                    SecurityContext context = new SecurityContextImpl(auth);
+
+                    return chain.filter(exchange)
+                            .contextWrite(ReactiveSecurityContextHolder.withSecurityContext(Mono.just(context)));
+                }
+            } catch (Exception e) {
+                logger.warn("JWT validation failed: {}", e.getMessage());
             }
         }
 
-        filterChain.doFilter(request, response);
+        // No valid token found, continue filter chain without authentication
+        return chain.filter(exchange);
     }
 
+    private List<SimpleGrantedAuthority> extractAuthoritiesFromClaims(Claims claims) {
+        Object roles = claims.get("authorities");
+        if (roles instanceof List<?> roleList) {
+            return roleList.stream()
+                    .map(Object::toString)
+                    .map(SimpleGrantedAuthority::new)
+                    .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
+    }
 }
