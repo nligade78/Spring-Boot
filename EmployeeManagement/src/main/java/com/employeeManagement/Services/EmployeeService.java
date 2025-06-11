@@ -13,7 +13,6 @@ import com.employeeManagement.security.JwtUtil;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -46,7 +45,7 @@ public class EmployeeService {
                     emp.setFirstName(request.getFirstName());
                     emp.setLastName(request.getLastName());
                     emp.setEmailId(request.getEmailId());
-                    emp.setPassword(passwordEncoder.encode(request.getPassword())); // always encode on creation
+                    emp.setPassword(passwordEncoder.encode(request.getPassword()));
                     emp.setGender(request.getGender());
                     emp.setAge(request.getAge());
                     emp.setContactNo(request.getContactNo());
@@ -57,7 +56,7 @@ public class EmployeeService {
                     emp.setDepartmentId(manager.getDepartmentId());
                     return employeeRepository.save(emp);
                 })
-                .map(this::convertToResponse);
+                .flatMap(this::enrichEmployeeResponse);
     }
 
     public Mono<EmployeeResponse> updateEmployee(Long id, EmployeeRequest request) {
@@ -76,7 +75,6 @@ public class EmployeeService {
                     emp.setLastName(request.getLastName());
                     emp.setEmailId(request.getEmailId());
 
-                    // Always encode password if provided (assuming client sends raw password)
                     if (request.getPassword() != null && !request.getPassword().isEmpty()) {
                         emp.setPassword(passwordEncoder.encode(request.getPassword()));
                     }
@@ -93,7 +91,7 @@ public class EmployeeService {
 
                     return employeeRepository.save(emp);
                 })
-                .map(this::convertToResponse);
+                .flatMap(this::enrichEmployeeResponse);
     }
 
     public Mono<Void> deleteEmployee(Long id) {
@@ -118,45 +116,42 @@ public class EmployeeService {
     }
 
     private EmployeeResponse convertToResponse(Employee emp) {
-        EmployeeResponse response = new EmployeeResponse();
-        response.setId(emp.getId());
-        response.setFirstName(emp.getFirstName());
-        response.setLastName(emp.getLastName());
-        response.setEmailId(emp.getEmailId());
-        response.setGender(emp.getGender());
-        response.setAge(emp.getAge());
-        response.setContactNo(emp.getContactNo());
-        response.setExperience(emp.getExperience());
-        response.setStreet(emp.getStreet());
-        response.setPincode(emp.getPincode());
-
-        // ManagerName and DepartmentName will be set in enrichEmployeeResponse
-
-        return response;
+        return new EmployeeResponse(
+                emp.getId(),
+                emp.getFirstName(),
+                emp.getLastName(),
+                emp.getEmailId(),
+                emp.getGender(),
+                emp.getAge(),
+                emp.getContactNo(),
+                emp.getExperience(),
+                emp.getStreet(),
+                emp.getPincode(),
+                null,
+                null
+        );
     }
 
-    // Fetch manager and department names and add to EmployeeResponse reactively
     private Mono<EmployeeResponse> enrichEmployeeResponse(Employee emp) {
         EmployeeResponse response = convertToResponse(emp);
 
-        Mono<Manager> managerMono = managerRepository.findById(emp.getManagerId());
-
-        return managerMono.flatMap(manager -> {
-            if (manager != null) {
-                response.setManagerName(manager.getFirstName() + " " + manager.getLastName());
-                // Now fetch department name by departmentId
-                return departmentRepository.findById(manager.getDepartmentId())
-                        .map(dept -> {
-                            if (dept != null) {
-                                response.setDepartmentName(dept.getDept());
-                            }
-                            return response;
-                        })
-                        .defaultIfEmpty(response);
-            } else {
-                return Mono.just(response);
-            }
-        }).switchIfEmpty(Mono.just(response));
+        return managerRepository.findById(emp.getManagerId())
+                .flatMap(manager -> {
+                    if (manager != null) {
+                        response.setManagerName(manager.getFirstName() + " " + manager.getLastName());
+                        return departmentRepository.findById(manager.getDepartmentId())
+                                .map(dept -> {
+                                    if (dept != null) {
+                                        response.setDepartmentName(dept.getDept());
+                                    }
+                                    return response;
+                                })
+                                .defaultIfEmpty(response);
+                    } else {
+                        return Mono.just(response);
+                    }
+                })
+                .switchIfEmpty(Mono.just(response));
     }
 
     public Mono<Employee> getEmployeeByEmail(String email) {

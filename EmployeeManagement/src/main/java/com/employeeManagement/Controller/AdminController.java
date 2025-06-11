@@ -21,9 +21,13 @@ public class AdminController {
     @PostMapping("/addAdmin")
     public Mono<ResponseEntity<Admin>> createAdmin(@RequestBody Admin admin) {
         return adminServices.createAdmin(admin)
-                .map(savedAdmin -> ResponseEntity.ok(savedAdmin))
-                .onErrorResume(e -> Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Admin>build()));
+                .map(ResponseEntity::ok)
+                .onErrorResume(e -> {
+                    e.printStackTrace(); // Add this line to log actual error
+                    return Mono.just(ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).<Admin>build());
+                });
     }
+
 
     @PostMapping("/login")
     public Mono<ResponseEntity<LoginResponse>> login(@RequestBody Map<String, String> request) {

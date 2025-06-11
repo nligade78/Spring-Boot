@@ -15,6 +15,24 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.BAD_REQUEST)
                 .body(ex.getMessage()));
     }
+
+    public class EmployeeNotFoundException extends RuntimeException {
+        public EmployeeNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public class ManagerNotFoundException extends RuntimeException {
+        public ManagerNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    public class EmailAlreadyInUseException extends RuntimeException {
+        public EmailAlreadyInUseException(String message) {
+            super(message);
+        }
+    }
 }
 
 

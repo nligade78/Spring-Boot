@@ -24,7 +24,9 @@ public class SecurityConfig {
         return http
                 .csrf(ServerHttpSecurity.CsrfSpec::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .headers(headers -> headers.disable()) // disables default headers (e.g. X-Frame-Options for H2)
+                // Disable security headers like X-Frame-Options (for H2 Console)
+                // ⚠️ Do not disable this in production unless necessary
+                .headers(headers -> headers.disable())
                 .authorizeExchange(auth -> auth
                         .pathMatchers(
                                 "/api/employees/login",
@@ -50,7 +52,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5173")); // Update this in production
+        // OR use: config.setAllowedOriginPatterns(List.of("*")); // use with caution
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

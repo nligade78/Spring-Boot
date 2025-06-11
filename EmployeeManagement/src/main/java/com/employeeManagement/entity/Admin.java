@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 @Getter
@@ -15,8 +16,14 @@ import org.springframework.data.relational.core.mapping.Table;
 public class Admin {
 
     @Id
-    private Integer id;
+    @Column("id")
+    private Long id;
 
+    @Column("email")
     private String email;
+
+    @Column("password")
     private String password;
 }
+
+

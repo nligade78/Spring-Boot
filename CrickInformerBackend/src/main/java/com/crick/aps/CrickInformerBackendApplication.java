@@ -8,6 +8,7 @@ public class CrickInformerBackendApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(CrickInformerBackendApplication.class, args);
+		System.out.println("Hii");
 	}
 
 }

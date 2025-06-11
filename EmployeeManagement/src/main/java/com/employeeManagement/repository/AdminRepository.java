@@ -6,9 +6,6 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface AdminRepository extends ReactiveCrudRepository<Admin, Integer> {
-
-   Mono<Admin> findByEmailAndPassword(String email, String password);
-
+public interface AdminRepository extends ReactiveCrudRepository<Admin, Long> {
    Mono<Admin> findByEmail(String email);
 }
