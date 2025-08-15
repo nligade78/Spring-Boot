@@ -26,9 +26,19 @@
         </processorPath>
         <module name="EmployeeManagement" />
       </profile>
+      <profile name="Annotation profile for Resume-ai-backend" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.38/lombok-1.18.38.jar" />
+        </processorPath>
+        <module name="Resume-ai-backend" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="demo" target="20" />
+      <module name="resume-ai-backend" target="21" />
       <module name="SpringBook" target="20" />
       <module name="springvalidation" target="20" />
     </bytecodeTargetLevel>
@@ -39,12 +49,14 @@
       <module name="EmployeeManagement" options="-parameters" />
       <module name="FileUploading" options="-parameters" />
       <module name="RestBookAPI" options="-parameters" />
+      <module name="Resume-ai-backend" options="-parameters" />
       <module name="SmartContactManager" options="-parameters" />
       <module name="SpringBook" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
       <module name="Thymeleaf-Project" options="-parameters" />
       <module name="demo" options="-parameters" />
       <module name="eduMaintenanceSystem" options="-parameters" />
+      <module name="resume-ai-backend" options="-parameters" />
       <module name="spring-validation" options="-parameters" />
       <module name="springmvcboot" options="-parameters" />
       <module name="springvalidation" options="-parameters" />
