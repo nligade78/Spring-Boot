@@ -148,3 +148,30 @@ private boolean validatePRLineItemData(Workbook importedExcelData, PRFormError f
 
     return lineItemHasError;
 }
+
+______
+
+// ADDED - put into BulkPRValidationService (or common util)
+private Map<String, Integer> buildHeaderIndex(Sheet sheet, int headerRowIndex) {
+    Map<String, Integer> headerIndex = new HashMap<>();
+    Row header = sheet.getRow(headerRowIndex);
+    if (header == null) return headerIndex;
+    for (Cell cell : header) {
+        if (cell == null) continue;
+        cell.setCellType(CellType.STRING);
+        String val = cell.getStringCellValue();
+        if (val != null) headerIndex.put(val.trim().toLowerCase(), cell.getColumnIndex());
+    }
+    return headerIndex;
+}
+
+// ADDED
+private String getCellString(Row row, Integer colIndex) {
+    if (row == null || colIndex == null) return null;
+    Cell c = row.getCell(colIndex);
+    if (c == null) return null;
+    c.setCellType(CellType.STRING);
+    String v = c.getStringCellValue();
+    return v == null ? null : v.trim();
+}
+
