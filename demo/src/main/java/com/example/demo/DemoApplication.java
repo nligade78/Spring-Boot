@@ -1,26 +1,32 @@
-SELECT
-    arn.FORM_ID,
-    arn.FORM_NUMBER,
-    arn.NODE_ID,
+CREATE OR REPLACE TRIGGER trg_user_status_log
+AFTER UPDATE OR DELETE ON efin_user
+FOR EACH ROW
+BEGIN
+   -- User becomes inactive (1 → 0)
+   IF UPDATING
+      AND :OLD.efin_user_active_flag = 1
+      AND :NEW.efin_user_active_flag = 0
+   THEN
+      INSERT INTO efin_user_status_log
+      VALUES (
+         :OLD.efin_user_nbr,
+         :OLD.efin_user_active_flag,
+         :NEW.efin_user_active_flag,
+         'INACTIVATED',
+         SYSDATE
+      );
+   END IF;
 
-    arn.APPROVER_ID              AS INACTIVE_USER_NBR,
-    eu.USER_FIRST_NAME           AS INACTIVE_FIRST_NAME,
-    eu.USER_LAST_NAME            AS INACTIVE_LAST_NAME,
-    eu.EMAIL_ADDRESS             AS INACTIVE_EMAIL,
-
-    eu.MGR_USER_NBR              AS MANAGER_USER_NBR,
-    mgr.USER_FIRST_NAME          AS MANAGER_FIRST_NAME,
-    mgr.USER_LAST_NAME           AS MANAGER_LAST_NAME,
-    mgr.EMAIL_ADDRESS            AS MANAGER_EMAIL,
-
-    arn.DONE_STATUS
-FROM ACTUAL_ROUTE_NODE arn
-JOIN EFIN_USER eu
-    ON eu.EFIN_USER_NBR = arn.APPROVER_ID
-LEFT JOIN EFIN_USER mgr
-    ON mgr.EFIN_USER_NBR = eu.MGR_USER_NBR
-WHERE eu.EFIN_USER_ACTIVE_FLAG <> '1'
-  AND arn.DONE_STATUS IN ('CURRENT', 'FUTURE')
-  AND arn.PERSON_OR_WORKGROUP = 'P'
-FETCH FIRST 100 ROWS ONLY;
-
+   -- User is deleted
+   IF DELETING THEN
+      INSERT INTO efin_user_status_log
+      VALUES (
+         :OLD.efin_user_nbr,
+         :OLD.efin_user_active_flag,
+         NULL,
+         'DELETED',
+         SYSDATE
+      );
+   END IF;
+END;
+/
