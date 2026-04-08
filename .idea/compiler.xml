@@ -15,6 +15,7 @@
         <module name="RestBookAPI" />
         <module name="SmartContactManager" />
         <module name="SpringJPA" />
+        <module name="SpringDataJPA" />
         <module name="springmvcboot" />
       </profile>
       <profile name="Annotation profile for EmployeeManagement" enabled="true">
@@ -52,6 +53,7 @@
       <module name="Resume-ai-backend" options="-parameters" />
       <module name="SmartContactManager" options="-parameters" />
       <module name="SpringBook" options="-parameters" />
+      <module name="SpringDataJPA" options="-parameters" />
       <module name="SpringJPA" options="-parameters" />
       <module name="Thymeleaf-Project" options="-parameters" />
       <module name="demo" options="-parameters" />

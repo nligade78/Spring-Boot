@@ -31,7 +31,9 @@ public class FileUploadHelper {
 //            fos.close();
 
             //type 2
-            Files.copy(multipartFile.getInputStream(), Paths.get(UPLOAD_DIR + File.separator + multipartFile.getOriginalFilename()), StandardCopyOption.REPLACE_EXISTING);
+            Files.copy(multipartFile.getInputStream(),
+                    Paths.get(UPLOAD_DIR + File.separator + multipartFile.getOriginalFilename()),
+                    StandardCopyOption.REPLACE_EXISTING);
 
             f = true;
 
