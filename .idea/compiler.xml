@@ -14,7 +14,6 @@
         <module name="CrickInformerBackend" />
         <module name="RestBookAPI" />
         <module name="SmartContactManager" />
-        <module name="SpringJPA" />
         <module name="SpringDataJPA" />
         <module name="springmvcboot" />
       </profile>
@@ -23,6 +22,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
           <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar" />
         </processorPath>
         <module name="EmployeeManagement" />
@@ -41,6 +41,7 @@
       <module name="demo" target="20" />
       <module name="resume-ai-backend" target="21" />
       <module name="SpringBook" target="20" />
+      <module name="SpringJPA" target="21" />
       <module name="springvalidation" target="20" />
     </bytecodeTargetLevel>
   </component>
