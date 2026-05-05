@@ -1,20 +1,24 @@
 package com.restBook.RestBookAPI.entities;
 
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name="books")
 public class Book {
+
     @Id
-    @GeneratedValue(strategy= GenerationType.AUTO)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
+
     private String title;
+
     @OneToOne(cascade = CascadeType.ALL)
     @JsonManagedReference
     private Author author;
 
-    public Book(int id, String title, Author author) {
+    public Book(Integer id, String title, Author author) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -23,11 +27,11 @@ public class Book {
     public Book() {
     }
 
-    public int getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
@@ -52,7 +56,7 @@ public class Book {
         return "Book{" +
                 "id=" + id +
                 ", title='" + title + '\'' +
-                ", author='" + author + '\'' +
+                ", author=" + author +
                 '}';
     }
 }

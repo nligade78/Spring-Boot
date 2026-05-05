@@ -11,6 +11,7 @@
         <module name="Thymeleaf-Project" />
         <module name="spring-validation" />
         <module name="FileUploading" />
+        <module name="interview-practice" />
         <module name="CrickInformerBackend" />
         <module name="RestBookAPI" />
         <module name="SmartContactManager" />
@@ -59,6 +60,7 @@
       <module name="Thymeleaf-Project" options="-parameters" />
       <module name="demo" options="-parameters" />
       <module name="eduMaintenanceSystem" options="-parameters" />
+      <module name="interview-practice" options="-parameters" />
       <module name="resume-ai-backend" options="-parameters" />
       <module name="spring-validation" options="-parameters" />
       <module name="springmvcboot" options="-parameters" />
