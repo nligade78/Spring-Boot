@@ -37,6 +37,15 @@
         </processorPath>
         <module name="Resume-ai-backend" />
       </profile>
+      <profile name="Annotation profile for empManagement" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.46/lombok-1.18.46.jar" />
+        </processorPath>
+        <module name="empManagement" />
+      </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
       <module name="demo" target="20" />
@@ -60,6 +69,7 @@
       <module name="Thymeleaf-Project" options="-parameters" />
       <module name="demo" options="-parameters" />
       <module name="eduMaintenanceSystem" options="-parameters" />
+      <module name="empManagement" options="-parameters" />
       <module name="interview-practice" options="-parameters" />
       <module name="resume-ai-backend" options="-parameters" />
       <module name="spring-validation" options="-parameters" />
