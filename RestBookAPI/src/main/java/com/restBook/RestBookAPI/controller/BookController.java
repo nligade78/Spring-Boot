@@ -101,3 +101,21 @@ public class BookController {
         }
     }
 }
+
+//Class Loaded
+//   ↓
+//Bean Definition Created
+//   ↓
+//Object Instantiated
+//   ↓
+//Dependencies Injected
+//   ↓
+//@PostConstruct
+//   ↓
+//Bean Ready
+//   ↓
+//Bean Used
+//   ↓
+//@PreDestroy
+//   ↓
+//Bean Destroyed

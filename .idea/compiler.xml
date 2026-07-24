@@ -13,6 +13,7 @@
         <module name="FileUploading" />
         <module name="interview-practice" />
         <module name="CrickInformerBackend" />
+        <module name="learn-resttemplate" />
         <module name="RestBookAPI" />
         <module name="SmartContactManager" />
         <module name="SpringDataJPA" />
@@ -71,6 +72,7 @@
       <module name="eduMaintenanceSystem" options="-parameters" />
       <module name="empManagement" options="-parameters" />
       <module name="interview-practice" options="-parameters" />
+      <module name="learn-resttemplate" options="-parameters" />
       <module name="resume-ai-backend" options="-parameters" />
       <module name="spring-validation" options="-parameters" />
       <module name="springmvcboot" options="-parameters" />

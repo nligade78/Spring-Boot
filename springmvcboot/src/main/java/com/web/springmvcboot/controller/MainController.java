@@ -1,16 +1,17 @@
 package com.web.springmvcboot.controller;
 
+
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
-@Controller
-
+@RestController
 public class MainController {
 
-    @RequestMapping("/home")
-    public String home()
+   @GetMapping("/getEmployee")
+    public String getEmployee()
     {
-        System.out.println("This is Home Page");
-        return " Home Controller ";
+        return "home";
     }
+
+
 }
